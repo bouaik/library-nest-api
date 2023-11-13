@@ -13,6 +13,11 @@ export class BookService {
   ) {}
 
   async findAll(query: Query): Promise<Book[]> {
+    const resPerPage = 2;
+    const currentPage = Number(query.page) || 1;
+
+    const skip = resPerPage * (currentPage - 1);
+
     const keyword = query.keyword
       ? {
           title: {
@@ -22,7 +27,10 @@ export class BookService {
         }
       : {};
 
-    const books = await this.bookModel.find({ ...keyword });
+    const books = await this.bookModel
+      .find({ ...keyword })
+      .limit(resPerPage)
+      .skip(skip);
 
     return books;
   }
@@ -39,7 +47,6 @@ export class BookService {
     if (!book) {
       throw new NotFoundException('Book not Found');
     }
-
     return book;
   }
 
